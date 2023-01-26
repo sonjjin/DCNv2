@@ -16,6 +16,14 @@
 #include <ATen/cuda/CUDAContext.h>
 #include <ATen/ceil_div.h>
 
+#if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 600
+#else
+__device__ double atomicAdd(double* a, double b) { return b; }
+#endif
+
+__device__ double s_global ;
+__global__ void kernel () { atomicAdd (&s_global, 1.0) ; }
+
 #define CUDA_KERNEL_LOOP(i, n)                        \
   for (int i = blockIdx.x * blockDim.x + threadIdx.x; \
        i < (n);                                       \
